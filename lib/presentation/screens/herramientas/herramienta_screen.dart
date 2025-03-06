@@ -10,10 +10,10 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:securion/presentation/widgets/inputs/input_sugestion.dart';
 
-import '../../config/plugins/camera_plugin.dart';
-import '../../config/router/router.dart';
-import '../bloc/data_cubit.dart';
-import '../widgets/inputs/custom_text_form_field.dart';
+import '../../../config/plugins/camera_plugin.dart';
+import '../../../config/router/router.dart';
+import '../../bloc/data_cubit.dart';
+import '../../widgets/inputs/custom_text_form_field.dart';
 
 int _toSecondsSinceEpoch(dynamic dateTime) {
     return dateTime.millisecondsSinceEpoch ~/ 1000;

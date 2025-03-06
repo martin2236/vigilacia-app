@@ -7,14 +7,42 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
+import 'package:securion/domain/entities/infraccion_entitie.dart';
+import 'package:securion/presentation/bloc/permissions_cubit/permissions_cubit.dart';
+import 'package:securion/presentation/screens/multas/imagen_multa_screen.dart';
 
-import '../../config/plugins/camera_plugin.dart';
-import '../../config/router/router.dart';
-import '../bloc/data_cubit.dart';
-import '../widgets/inputs/custom_text_form_field.dart';
+import '../../../config/plugins/camera_plugin.dart';
+import '../../../config/router/router.dart';
+import '../../bloc/data_cubit.dart';
+import '../../widgets/inputs/custom_text_form_field.dart';
 
 int _toSecondsSinceEpoch(dynamic dateTime) {
     return dateTime.millisecondsSinceEpoch ~/ 1000;
+  }
+   Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+    
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+        'Location permissions are permanently denied, we cannot request permissions.');
+    } 
+    return await Geolocator.getCurrentPosition();
   }
 
 class MultasScreen extends StatefulWidget {
@@ -33,7 +61,10 @@ class  _MultasScreenState extends State<MultasScreen> {
   String? dominio;
   String? tipoPersona;
   String? lote;
-  late String? imagepath = null;
+  bool cargando = false;
+  late String? imagepath1 = null;
+  late String? imagepath2 = null;
+  late String? imagepath3 = null;
   
 
   @override
@@ -46,10 +77,9 @@ class  _MultasScreenState extends State<MultasScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final text = Theme.of(context).textTheme;
-    final dataCubit = context.watch<DataCubit>();
-    final razas = dataCubit.state.razas;
+   
 
-    void _showImageDialog(BuildContext context) {
+    void _showImageDialog(BuildContext context, int image) {
   showDialog<String>(
     context: context,
     builder: (BuildContext context) => Dialog(
@@ -62,9 +92,24 @@ class  _MultasScreenState extends State<MultasScreen> {
             FilledButton.icon(icon:const Icon(Icons.camera_alt_rounded),onPressed: ()async{
               Navigator.pop(context);
              final path =  await CameraPlugin().takePhoto();
-              setState(() {
-                imagepath = path;
-              });
+              switch (image) {
+                case 1:
+                  setState(() {
+                    imagepath1 = path;
+                  });
+                  break;
+                  case 2:
+                  setState(() {
+                    imagepath2 = path;
+                  });
+                  break;
+                  case 3:
+                  setState(() {
+                    imagepath3 = path;
+                  });
+                  break;
+                default:
+              }
             }, label: const Text('Tomar foto')),
             FilledButton.icon(
               icon: const Icon(Icons.image_search),
@@ -104,21 +149,25 @@ class  _MultasScreenState extends State<MultasScreen> {
                 children: [
                   SizedBox(height: size.height * 0.03),
                   
-                  GestureDetector(
-                    onTap: () => _showImageDialog(context),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child:Row(  
+                    children: [
+                      GestureDetector(
+                    onTap: () => _showImageDialog(context,1),
                     child: DottedBorder(
                        dashPattern: const [9, 9, 9, 9],
                        color: Colors.blue.shade800,
                        strokeWidth: 2,
-                      child:imagepath != null ?  
-                      Image(image: FileImage(File(imagepath!)),
-                      height: size.width * 0.5,
-                      width: size.width * 0.9,
+                      child:imagepath1 != null ?  
+                      Image(image: FileImage(File(imagepath1!)),
+                      height: size.width * 0.55,
+                      width: size.width * 0.44,
                       ) 
                       :  
                       Container(
-                        height: size.width * 0.5,
-                        width: size.width * 0.9,
+                        height: size.width * 0.55,
+                        width: size.width * 0.44,
                         decoration: BoxDecoration(
                             color: Colors.blue.shade50,
                         ),
@@ -127,12 +176,46 @@ class  _MultasScreenState extends State<MultasScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Icon(Icons.image_rounded,size: size.height * 0.05, color: Colors.blue.shade800,),
-                            Text('Toca para agregar imagen', style:text.titleSmall!.copyWith(color: Colors.blue.shade800,),)
+                            Text('Toca para agregar imagen', style:text.titleSmall!.copyWith(color: Colors.blue.shade800,),textAlign: TextAlign.center,)
                           ],
                         ),
                       ),
                     ),
                   ),
+                  SizedBox(width: size.width * 0.03,),
+                  GestureDetector(
+                    onTap: () => _showImageDialog(context,2),
+                    child: DottedBorder(
+                       dashPattern: const [9, 9, 9, 9],
+                       color: Colors.blue.shade800,
+                       strokeWidth: 2,
+                      child:imagepath2 != null ?  
+                      Image(image: FileImage(File(imagepath2!)),
+                      height: size.width * 0.55,
+                      width: size.width * 0.44,
+                      ) 
+                      :  
+                      Container(
+                        height: size.width * 0.55,
+                        width: size.width * 0.44,
+                        decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(Icons.image_rounded,size: size.height * 0.05, color: Colors.blue.shade800,),
+                            Text('Toca para agregar imagen', style:text.titleSmall!.copyWith(color: Colors.blue.shade800,),textAlign: TextAlign.center,)
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  ],
+                  )
+                ),
                   SizedBox(height: size.height * 0.03),
                    SizedBox(
                   height: 80,
@@ -145,7 +228,6 @@ class  _MultasScreenState extends State<MultasScreen> {
                     },
                     hint: 'NOMBRE',
                     alignText: true,
-                    keyboardType: TextInputType.number,
                    ),
                  ),
                      SizedBox(
@@ -160,7 +242,6 @@ class  _MultasScreenState extends State<MultasScreen> {
                     hint: 'OBSERVACIONES',
                     maxLines: 3,
                     alignText: true,
-                    keyboardType: TextInputType.number,
                    ),
                  ),
                 
@@ -193,7 +274,6 @@ class  _MultasScreenState extends State<MultasScreen> {
                         },
                         hint: 'DOMINIO',
                         alignText: true,
-                        keyboardType: TextInputType.number,
                       ),
                     ),
                     
@@ -214,7 +294,6 @@ class  _MultasScreenState extends State<MultasScreen> {
                         },
                         hint: 'TIPO PERSONA',
                         alignText: true,
-                        keyboardType: TextInputType.number,
                       ),
                     ),
                       
@@ -229,7 +308,6 @@ class  _MultasScreenState extends State<MultasScreen> {
                         },
                         hint: 'LOTE',
                         alignText: true,
-                        keyboardType: TextInputType.number,
                       ),
                     ),
                     
@@ -239,17 +317,67 @@ class  _MultasScreenState extends State<MultasScreen> {
                 SizedBox(
                   height: 50,
                   width: size.width,
-                   child:FilledButton.icon(
+                   child:
+                   cargando ? CircularProgressIndicator() : FilledButton.icon(
                     style: ButtonStyle(
                       backgroundColor: WidgetStateProperty.all(Colors.blue.shade800,)
                     ) ,
-                    onPressed: (){
-                      int fecha = _toSecondsSinceEpoch(DateTime.now());
-                     
-        
-                     
-                      router.pop();
-                    },
+                    onPressed: () async {
+  try {
+    setState(() {
+      cargando = true;
+    });
+
+    final datacubit = context.read<DataCubit>();
+    int fecha = _toSecondsSinceEpoch(DateTime.now());
+
+    final position = await _determinePosition();
+    print('🌍 Ubicación obtenida: ${position.latitude}, ${position.longitude}');
+
+    final infraccion = Infraccion(
+      nombre: nombre ?? '',
+      observaciones: observaciones ?? '',
+      dni: dni ?? '',
+      dominio: dominio ?? '',
+      tipopersona: tipoPersona ?? '',
+      lote: lote ?? '',
+      latitud: position.latitude.toString(),
+      longitud: position.longitude.toString(),
+      imagen1: imagepath1 ?? '',
+      imagen2: imagepath2 ?? '',
+      imagen3: imagepath3 ?? '',
+      updatedAt: fecha.toString(),
+      deletedAt: null,
+    );
+
+    print('📋 Multa generada: $infraccion');
+
+    final (response, mensaje) = await datacubit.generarMulta(infraccion);
+
+    print('✅ Respuesta de la multa: $response, Mensaje: $mensaje');
+
+    setState(() {
+      cargando = false;
+    });
+
+    if (response == true) {
+      print('🔄 Navegando a ImagenMultaScreen');
+      Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => ImagenMultaScreen(fecha: DateTime.now().toLocal().toString().split(' ')[0], hora: TimeOfDay.now().format(context), nombre: nombre ?? '', dominio: dominio ?? '', observaciones: observaciones ?? '', lat: position.latitude, lng: position.longitude, imagenFrontal: imagepath1 ?? '', imagenLateral: imagepath2 ?? ''
+))
+      );
+    
+    } else {
+      print('⚠ No se pudo generar la multa.');
+    }
+  } catch (e, stack) {
+    print('❌ Error al generar la multa: $e');
+    print(stack);
+  }
+},
+
+                    
                     icon: Icon(Icons.add_circle, size:size.height * 0.035,),
                     label:  Text('Generar multa',style:text.titleLarge!.copyWith(color:Colors.white))
                     ),

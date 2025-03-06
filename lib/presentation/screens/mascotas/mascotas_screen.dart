@@ -10,23 +10,23 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:currency_textfield/currency_textfield.dart';
 import 'package:securion/presentation/widgets/inputs/input_sugestion.dart';
 
-import '../../config/plugins/camera_plugin.dart';
-import '../../config/router/router.dart';
-import '../bloc/data_cubit.dart';
-import '../widgets/inputs/custom_text_form_field.dart';
+import '../../../config/plugins/camera_plugin.dart';
+import '../../../config/router/router.dart';
+import '../../bloc/data_cubit.dart';
+import '../../widgets/inputs/custom_text_form_field.dart';
 
-int _toSecondsSinceEpoch(dynamic dateTime) {
+int toSecondsSinceEpoch(dynamic dateTime) {
     return dateTime.millisecondsSinceEpoch ~/ 1000;
   }
 
-class VehiculosScreen extends StatefulWidget {
-  const VehiculosScreen({super.key});
+class MascotasScreen extends StatefulWidget {
+  const MascotasScreen({super.key});
 
   @override
-  State<VehiculosScreen> createState() => _VehiculosScreenState();
+  State<MascotasScreen> createState() => _MascotasScreenState();
 }
 
-class  _VehiculosScreenState extends State<VehiculosScreen> {
+class  _MascotasScreenState extends State<MascotasScreen> {
   String? result;
   String? categoria;
   //datos del producto
@@ -98,7 +98,7 @@ class  _VehiculosScreenState extends State<VehiculosScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nuevo Vehiculo'),
+        title: const Text('Nueva Mascota'),
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -142,6 +142,7 @@ class  _VehiculosScreenState extends State<VehiculosScreen> {
                     ),
                   ),
                   SizedBox(height: size.height * 0.03),
+                  const Text('Informacion del animal'),
                    SizedBox(
                   height: 80,
                   width: size.width,
@@ -152,19 +153,65 @@ class  _VehiculosScreenState extends State<VehiculosScreen> {
                         precio = value;
                       });
                     },
-                    hint: 'TITULAR',
+                    hint: 'NOMBRE DE LA MASCOTA',
                     alignText: true,
                     keyboardType: TextInputType.number,
                    ),
                  ),
-               
-                
-                  Row(
+                   SizedBox(
+                          height: 80,
+                        child: InputSugestion(
+                          
+                          sugerencia: TipoSugerencia.raza,
+                          titulo: 'RAZA',
+                          razas: razas,
+                          onValueChanged: (value) => setState(() {
+                            nombre = value;
+                          }),
+                        ),
+                        ),
+                      
+                 
+                    
+                 
+                 const Text('Informacion del dueño'),
+                 SizedBox(
+                  height: 80,
+                  width: size.width,
+                   child: CustomTextFormField(
+                    controller: _currencyController,
+                    onChanged: (value){
+                      setState(() {
+                        precio = value;
+                      });
+                    },
+                    hint: 'NOMBRE DEL DUEÑO',
+                    alignText: true,
+                    keyboardType: TextInputType.number,
+                   ),
+                 ),
+                 
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
                       height: 80,
-                      width: size.width * 0.45,
+                      width: size.width * 0.33,
+                      child: CustomTextFormField(
+                        onChanged: (value){  
+                          setState(() {
+                          cantidad = value.toString();
+                        });
+                        },
+                        hint: 'LOTE',
+                        alignText: true,
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                      
+                     SizedBox(
+                      height: 80,
+                      width: size.width * 0.53,
                       child: CustomTextFormField(
                         onChanged: (value){  
                           setState(() {
@@ -176,76 +223,10 @@ class  _VehiculosScreenState extends State<VehiculosScreen> {
                         keyboardType: TextInputType.number,
                       ),
                     ),
-                      
-                     SizedBox(
-                      height: 80,
-                      width: size.width * 0.45,
-                      child: CustomTextFormField(
-                        onChanged: (value){  
-                          setState(() {
-                          cantidad = value.toString();
-                        });
-                        },
-                        hint: 'DOMINIO',
-                        alignText: true,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
                     
                   ],
                  ),
-                 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(
-                      height: 80,
-                      width: size.width * 0.45,
-                      child: CustomTextFormField(
-                        onChanged: (value){  
-                          setState(() {
-                          cantidad = value.toString();
-                        });
-                        },
-                        hint: 'MARCA',
-                        alignText: true,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                      
-                     SizedBox(
-                      height: 80,
-                      width: size.width * 0.45,
-                      child: CustomTextFormField(
-                        onChanged: (value){  
-                          setState(() {
-                          cantidad = value.toString();
-                        });
-                        },
-                        hint: 'MODELO',
-                        alignText: true,
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    
-                  ],
-                 ),
-                        SizedBox(
-                  height: 130,
-                  width: size.width,
-                   child: CustomTextFormField(
-                    controller: _currencyController,
-                    onChanged: (value){
-                      setState(() {
-                        precio = value;
-                      });
-                    },
-                    hint: 'DETALLES',
-                    maxLines: 3,
-                    alignText: true,
-                    keyboardType: TextInputType.number,
-                   ),
-                 ),
+                  
                 SizedBox(
                   height: 50,
                   width: size.width,
@@ -254,14 +235,14 @@ class  _VehiculosScreenState extends State<VehiculosScreen> {
                       backgroundColor: WidgetStateProperty.all(Colors.blue.shade800,)
                     ) ,
                     onPressed: (){
-                      int fecha = _toSecondsSinceEpoch(DateTime.now());
+                      int fecha = toSecondsSinceEpoch(DateTime.now());
                      
         
                      
                       router.pop();
                     },
                     icon: Icon(Icons.add_circle, size:size.height * 0.035,),
-                    label:  Text('Generar multa',style:text.titleLarge!.copyWith(color:Colors.white))
+                    label:  Text('Agregar Mascota',style:text.titleLarge!.copyWith(color:Colors.white))
                     ),
                  ),
                 

@@ -1,0 +1,1 @@
+export './infraccion-model.dart';

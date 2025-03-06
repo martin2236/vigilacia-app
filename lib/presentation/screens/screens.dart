@@ -1,5 +1,10 @@
 export 'home_screen.dart';
-export 'mascotas_screen.dart';
-export 'multas_screen.dart';
-export 'vehiculos_screen.dart';
-export 'herramientas_screen.dart';
+export 'mascotas/mascotas_screen.dart';
+export 'mascotas/mascota_main_screen.dart';
+export 'multas/multas_screen.dart';
+export 'multas/multa_main_screen.dart';
+export 'multas/imagen_multa_screen.dart';
+export 'vehiculos/vehiculos_screen.dart';
+export 'vehiculos/vehiculo_main_screen.dart';
+export 'herramientas/herramienta_screen.dart';
+export 'herramientas/herramienta_main_screen.dart';
